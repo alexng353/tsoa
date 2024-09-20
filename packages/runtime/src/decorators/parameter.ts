@@ -82,6 +82,15 @@ export function Header(name?: string): ParameterDecorator {
 }
 
 /**
+ * Inject the real ip address of the client
+ */
+export function RealIP(): ParameterDecorator {
+  return () => {
+    return;
+  };
+}
+
+/**
  * Mark parameter as manually injected, which will not be generated
  */
 export function Inject(): ParameterDecorator {

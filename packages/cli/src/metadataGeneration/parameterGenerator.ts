@@ -33,6 +33,8 @@ export class ParameterGenerator {
         return [this.getFormFieldParameter(this.parameter)];
       case 'Header':
         return [this.getHeaderParameter(this.parameter)];
+      case 'RealIP':
+        return [this.getRealIPParameter(this.parameter)];
       case 'Query':
         return this.getQueryParameters(this.parameter);
       case 'Queries':
@@ -193,6 +195,31 @@ export class ParameterGenerator {
       name: parameterName,
       example,
       exampleLabels,
+      parameterName,
+      required: !parameter.questionToken && !parameter.initializer,
+      type,
+      validators: getParameterValidators(this.parameter, parameterName),
+      deprecated: this.getParameterDeprecation(parameter),
+    };
+  }
+
+  private getRealIPParameter(parameter: ts.ParameterDeclaration): Tsoa.Parameter {
+    const parameterName = (parameter.name as ts.Identifier).text;
+    const type = this.getValidatedType(parameter);
+
+    if (!this.supportPathDataType(type)) {
+      throw new GenerateMetadataError(`@RealIP('${parameterName}') Can't support '${type.dataType}' type.`);
+    }
+
+    const { examples: example, exampleLabels } = this.getParameterExample(parameter, parameterName);
+
+    return {
+      default: getInitializerValue(parameter.initializer, this.current.typeChecker, type),
+      description: this.getParameterDescription(parameter),
+      example,
+      exampleLabels,
+      in: 'header',
+      name: 'X-Real-IP',
       parameterName,
       required: !parameter.questionToken && !parameter.initializer,
       type,
